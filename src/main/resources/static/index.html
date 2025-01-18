@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Chat Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #container {
+            max-width: 400px;
+            margin: auto;
+        }
+
+        button {
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- 引入 jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+
+<body>
+    <div id="container">
+        <h1>Welcome to Chat Application</h1>
+        <input id="username" type="text" placeholder="Enter your username">
+        <button onclick="createChat()">Create Chat</button>
+        <button onclick="joinChat()">Join Chat</button>
+    </div>
+
+    <script>
+        function createChat() {
+            const username = document.getElementById('username').value;
+            if (!username) {
+                alert('用户名不能为空！'); // 检查用户名是否为空
+                return;
+            }
+            localStorage.setItem('username', username); // 将用户名存储在本地
+            $.ajax({
+                url: '/api/createChat?userId=' + username,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ userId: username }),
+                success: function (data) {
+                    console.log('Chat created successfully:', data);
+                    alert('创建聊天成功，密匙是：'+data.key);
+                    localStorage.setItem("chatKey", data.key);
+                    window.location.href = "createChat.html?chatKey=" + encodeURIComponent(data.key) + "&username=" + encodeURIComponent(username);
+                },
+                error: function (xhr, status, error) {
+                    alert('创建聊天失败，请重试。');
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function joinChat() {
+            const username = document.getElementById('username').value;
+            if (!username) {
+                alert('用户名不能为空！'); // 检查用户名是否为空
+                return;
+            }
+            const key = prompt("输入密匙:");
+            if (key) {
+                // 验证密钥是否有效
+                $.ajax({
+                    url: '/api/joinChat?key=' + key + '&userId=' + encodeURIComponent(localStorage.getItem('username')),
+                    type: 'POST',
+                    data: JSON.stringify({
+                        key: key,
+                        userId: username
+                    }),
+                    success: function (response) {
+                        if (response.success) {
+                            localStorage.setItem("chatKey", key);
+                            // 跳转到加入聊天页面
+                            alert('密匙正确！');
+                            window.location.href = "joinChat.html?chatKey=" + encodeURIComponent(key) + "&username=" + encodeURIComponent(username);
+                        } else {
+                            alert("密钥无效，无法进入聊天室！");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("请求失败，请稍后再试。");
+                        console.error("Error during key validation:", error);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

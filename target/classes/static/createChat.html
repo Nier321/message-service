@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Create Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let stompClient = null;
+        // 获取 URL 查询参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username');
+        localStorage.setItem('username', username); // 将用户名存储在本地
+        function connect() {
+            // 连接到 WebSocket
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/messages/' + localStorage.getItem('chatKey'), function (message) {
+                    console.log('Received message body: ', message.body); // 打印消息体
+                    const chatMessage = JSON.parse(message.body);
+                    console.log('subscribed tochatMessage: ' + chatMessage);
+                document.getElementById('messages').innerHTML += '<p><strong>' + chatMessage.userId + ':</strong> ' + chatMessage.message + '</p>';
+            });
+                
+            })
+
+            
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+            if (message && stompClient) {
+                stompClient.send('/app/sendMessage', {}, JSON.stringify({
+                    chatkey: localStorage.getItem('chatKey'),
+                    userId: localStorage.getItem('username'),
+                    message: message,
+                }));
+                messageInput.value = '';
+                // Add the sent message to the sent messages area
+                //document.getElementById('sentMessages').innerHTML += '<p><strong>' + username + '</strong> ' + message + '</p>';
+            }
+        }
+        
+        function quitChat() {
+            stompClient.send('/app/quitChat', {}, JSON.stringify({
+                chatkey: localStorage.getItem('chatKey'),
+                userId: localStorage.getItem('username'),
+            })
+            )
+            stompClient.unsubscribe('/topic/messages/' + localStorage.getItem('chatKey'));
+            stompClient.disconnect();
+            window.location.href = "index.html";
+        }
+            
+        
+
+    </script>
+</head>
+<body onload="connect()">
+    <h1>Create Chat</h1>
+    <div id="messages"></div>
+    <div id="sentMessages" style="border: 1px solid #ccc; padding: 10px; margin-top: 10px; height: 200px; overflow-y: scroll;"></div>
+    <input id="messageInput" type="text" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+</body>
+</html>
