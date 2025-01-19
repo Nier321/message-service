@@ -17,6 +17,7 @@ rocketmq:
 logging:
   file:
     name: logs/application.log
+    encoding: UTF-8
   level:
     root: INFO
     com.jobconnect: DEBUG

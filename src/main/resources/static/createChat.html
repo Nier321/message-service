@@ -1,33 +1,126 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
-    <title>Create Chat</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>聊天室</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(to right, #007BFF, #00BFFF); /* 温馨的渐变背景 */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: space-between;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #chatContainer {
+            width: 95%;
+            margin: auto;
+            border: 1px solid #fff;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chatMessages {
+            max-height: 98%;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            padding: 15px;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */ /* 移除阴影 */
+            border: none; /* 添加这一行以去掉边框 */
+            width: 100%; /* 确保宽度与 #chatContainer 一致 */
+        }
+
+        #Container {
+            display: flex;
+            margin-top: auto; /* 确保输入框和按钮在底部 */
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin-right: 5%;
+            border-radius: 5px;
+            border: none;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50; /* 修改按钮颜色 */
+            color: white;
+            cursor: pointer;
+            width: 20%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #3e8e41;
+        }
+    </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body onload="connect()">
+    <h1>聊天室</h1>
+    <div id="chatContainer">
+        <div id="chatMessages"></div>
+        <div id="Container">
+            <input id="messageInput" type="text" placeholder="输入您的消息...">
+            <button onclick="sendMessage()">发送消息</button>
+        </div>
+    </div>
+    <button id="quitButton" style="position: absolute; top: 10px; right: 10px;" onclick="confirmQuitChat()">结束聊天</button>
+
     <script>
         let stompClient = null;
         // 获取 URL 查询参数
         const urlParams = new URLSearchParams(window.location.search);
-        const username = urlParams.get('username');
-        localStorage.setItem('username', username); // 将用户名存储在本地
+        const username = sessionStorage.getItem('username');
+        const chatKey = sessionStorage.getItem('chatKey');
+
+        if (!username || !chatKey) {
+            alert('用户名或密钥无效，请返回重新输入。');
+            window.location.href = "index.html"; // 返回首页
+        }
+
         function connect() {
-            // 连接到 WebSocket
             const socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
-                console.log('Connected: ' + frame);
-                stompClient.subscribe('/topic/messages/' + localStorage.getItem('chatKey'), function (message) {
-                    console.log('Received message body: ', message.body); // 打印消息体
+                console.log('连接成功: ' + frame);
+                stompClient.subscribe('/topic/messages/' + chatKey, function (message) {
+                    console.log('收到消息: ', message.body);
                     const chatMessage = JSON.parse(message.body);
-                    console.log('subscribed tochatMessage: ' + chatMessage);
-                document.getElementById('messages').innerHTML += '<p><strong>' + chatMessage.userId + ':</strong> ' + chatMessage.message + '</p>';
+                    displayMessage(chatMessage);
+                });
             });
-                
-            })
+        }
 
-            
+        function displayMessage(chatMessage) {
+            const messagesDiv = document.getElementById('chatMessages');
+            messagesDiv.innerHTML += '<p><strong>' + chatMessage.userId + ':</strong> ' + chatMessage.message + '</p>';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // 滚动到最新消息
         }
 
         function sendMessage() {
@@ -35,36 +128,34 @@
             const message = messageInput.value;
             if (message && stompClient) {
                 stompClient.send('/app/sendMessage', {}, JSON.stringify({
-                    chatkey: localStorage.getItem('chatKey'),
-                    userId: localStorage.getItem('username'),
+                    chatkey: chatKey,
+                    userId: username,
                     message: message,
                 }));
                 messageInput.value = '';
-                // Add the sent message to the sent messages area
-                //document.getElementById('sentMessages').innerHTML += '<p><strong>' + username + '</strong> ' + message + '</p>';
             }
         }
-        
+
+
+        function confirmQuitChat() {
+            if (confirm("您确认退出聊天吗？")) {
+                quitChat();
+            }
+        }
+
         function quitChat() {
             stompClient.send('/app/quitChat', {}, JSON.stringify({
-                chatkey: localStorage.getItem('chatKey'),
-                userId: localStorage.getItem('username'),
+                chatKey: chatKey,
             })
             )
-            stompClient.unsubscribe('/topic/messages/' + localStorage.getItem('chatKey'));
+            stompClient.unsubscribe('/topic/messages/' + chatKey);
             stompClient.disconnect();
+            sessionStorage.removeItem('chatKey');
+            sessionStorage.removeItem('username');
             window.location.href = "index.html";
         }
-            
         
-
     </script>
-</head>
-<body onload="connect()">
-    <h1>Create Chat</h1>
-    <div id="messages"></div>
-    <div id="sentMessages" style="border: 1px solid #ccc; padding: 10px; margin-top: 10px; height: 200px; overflow-y: scroll;"></div>
-    <input id="messageInput" type="text" placeholder="Type a message..." />
-    <button onclick="sendMessage()">Send</button>
 </body>
+
 </html>

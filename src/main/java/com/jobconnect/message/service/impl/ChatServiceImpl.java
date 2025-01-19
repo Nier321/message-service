@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jobconnect.message.constant.MQConstants;
 import com.jobconnect.message.controller.ChatController;
 import com.jobconnect.message.dto.ChatDTO;
 import com.jobconnect.message.event.ChatEvent;
@@ -37,13 +36,14 @@ public class ChatServiceImpl implements ChatService {
     private final MessageService messageService;
 
     // 用户密钥 与用户列表的映射线程安全hashmap
-    private final ConcurrentHashMap<String, List<String>> chatSessions = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, List<String>> chatSessions = new ConcurrentHashMap<>();
 
-     /**
+    /**
      * 构造函数，用于初始化 SimpMessagingTemplate
+     * 
      * @param messagingTemplate SimpMessagingTemplate 实例
      */
-   
+
     /**
      * 生成一个随机密钥
      * 
@@ -77,29 +77,30 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ChatDTO createChat(String userName) {
         Future<ChatDTO> future = executorPool.submit(() -> {
-            logger.info("Received request to create chat for sessionId: {}", userName);
-            String key = generateKey(); // 生成密钥
-            List<String> userlist = new ArrayList<>(); // 聊天人员列表
-            userlist.add(userName);
-            chatSessions.put(key, userlist);
-            ChatDTO chat = ChatDTO.builder()
-                    .chatKey(key)
-                    .creator(userName)
-                    .build();
-            // 发送创建聊天事件
-            ChatEvent ChatEvent = com.jobconnect.message.event.ChatEvent.builder()
-                    .chatKey(key)
-                    .creator(userName)
-                    .eventType("CREATE")
-                    .build();
-            messageService.sendChatEvent(ChatEvent, MQConstants.TAG_CHAT_NEW);
-            return chat;
+        logger.info("Received request to create chat for sessionId: {}", userName);
+        String key = generateKey(); // 生成密钥
+        List<String> userlist = new ArrayList<>(); // 聊天人员列表
+        userlist.add(userName);
+        chatSessions.put(key, userlist);
+        ChatDTO chat = ChatDTO.builder()
+                .chatKey(key)
+                .creator(userName)
+                .build();
+        // 发送创建聊天事件
+        ChatEvent chatEvent = ChatEvent.builder()
+                .chatKey(key)
+                .creator(userName)
+                .eventType("CREATE")
+                .build();
+        // messageService.sendChatEvent(chatEvent, MQConstants.TAG_CHAT_NEW);
+        logger.debug("service聊天室已create");
+        return chat;
         });
         try {
-            return future.get();
+        return future.get();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        e.printStackTrace();
+        return null;
         }
     }
 
@@ -107,38 +108,50 @@ public class ChatServiceImpl implements ChatService {
     public Boolean joinChat(String chatKey, String username) {
         logger.info("joinChat request to validate key: {} ，user:{}", chatKey, username);
         Future<Boolean> future = executorPool.submit(() -> {
-            if (chatSessions.containsKey(chatKey)) {
-                chatSessions.get(chatKey).add(username); // 将用户加入聊天室
-                sendMessageToWebSocket(chatKey, username, "你好！我是" + username);// 发送加入消息
-                ChatEvent chatEvent = ChatEvent.builder()
-                .chatKey(chatKey)
-                .joiner(username)
-                .eventType("JOIN")
-                .build();    
-                messageService.sendChatEvent(chatEvent, MQConstants.TAG_CHAT_JOIN);
-                return true;
-            } else {
-                return false;
-            }
+        logger.debug("service join check 检查聊天室是否存在:{}", chatSessions.containsKey(chatKey));
+        if (chatSessions.get(chatKey) != null) {
+            chatSessions.get(chatKey).add(username); // 将用户加入聊天室
+            sendMessageToWebSocket(chatKey, username, "你好！我是" + username);// 发送加入消息
+            ChatEvent chatEvent = ChatEvent.builder()
+                    .chatKey(chatKey)
+                    .joiner(username)
+                    .eventType("JOIN")
+                    .build();
+            // messageService.sendChatEvent(chatEvent, MQConstants.TAG_CHAT_JOIN);
+            logger.debug("service聊天室已join");
+            return true;
+        } else {
+            return false;
+        }
         });
         try {
-            return future.get();
+        return future.get();
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        e.printStackTrace();
+        return false;
         }
     }
 
     @Override
     public void sendMessage(String chatKey, String sender, String message) {
-        sendMessageToWebSocket(chatKey, sender, message); 
-        
+        sendMessageToWebSocket(chatKey, sender, message);
+
     }
 
-
     @Override
-    public Void deleteChat(String chatKey) {
-        throw new UnsupportedOperationException("Unimplemented method 'deleteChat'");
+    public void deleteChat(String chatKey) {
+        synchronized (chatSessions) {
+            logger.debug("before{} chatkey:{}", chatSessions.size(), chatKey.trim());
+                chatSessions.remove(chatKey);
+            chatSessions.forEach((k, v) -> logger.debug("service chatkey1:{} 聊天室已删除 检查:{}", k, v));
+        }
+        ChatEvent chatEvent = ChatEvent.builder()
+                .chatKey(chatKey)
+                .eventType("DELETE")
+                .build();
+        // messageService.sendChatEvent(chatEvent, MQConstants.TAG_CHAT_DELETE);
+        chatSessions.forEach((k, v) -> logger.debug("service chatkey2:{} 聊天室已删除 检查:{}", k, v));
+        logger.debug("service delete chatkey:{}聊天室已删除 检查:{}", chatKey, chatSessions.containsKey(chatKey));
     }
 
     private void sendMessageToWebSocket(String chatKey, String sender, String message) {
@@ -149,9 +162,8 @@ public class ChatServiceImpl implements ChatService {
             logger.debug("Message: {} sent to chatroom: {}", message, chatKey.toString());
         } catch (MessagingException e) {
             e.printStackTrace();
-           logger.error("Error sending message发送消息失败: {}", e.getMessage()); 
+            logger.error("Error sending message发送消息失败: {}", e.getMessage());
         }
-       
 
     }
 
@@ -159,7 +171,5 @@ public class ChatServiceImpl implements ChatService {
     public void shutdown() {
         executorPool.shutdown();
     }
-
-   
 
 }

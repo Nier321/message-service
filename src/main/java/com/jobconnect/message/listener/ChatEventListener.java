@@ -37,7 +37,7 @@ public class ChatEventListener implements RocketMQListener<ChatEvent>{
     private void handleChatJoined(ChatEvent event) {
         // 处理聊天加入事件
         // 数据更新
-        log.info("聊天室已更新: {}", event);
+        log.info("聊天室已加入新成员: {}", event);
     }
     private void handleChatDeleted(ChatEvent event) {
         // 处理聊天删除事件

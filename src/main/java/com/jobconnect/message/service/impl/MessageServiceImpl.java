@@ -31,9 +31,10 @@ public class MessageServiceImpl implements MessageService {
         String destination = MQConstants.TOPIC_CHAT + ":" + tag;
         // 创建消息对象，携带事件数据
         Message<ChatEvent> message = MessageBuilder.withPayload(event).build();
-
+        rocketMQTemplate.syncSend(destination, message);
+        log.info("{}聊天事件发生！: {}",tag, event);
         // 通过 RocketMQ 异步发送消息
-        rocketMQTemplate.asyncSend(destination, message, new SendCallback(){
+       /*  rocketMQTemplate.asyncSend(destination, message, new SendCallback(){
 
         @Override
         public void onException(Throwable throwable) {
@@ -47,7 +48,7 @@ public class MessageServiceImpl implements MessageService {
         public void onSuccess(SendResult arg0) {
             // 记录发送成功的日志
             log.info("{}聊天事件发生成功！: {}",tag, event);
-    }});
+    }});*/
 
         
     }
