@@ -10,8 +10,10 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(to right, #007BFF, #00BFFF); /* 设置背景为渐变蓝色 */
-            color: white; /* 设置字体颜色为白色 */
+            background: linear-gradient(to right, #007BFF, #00BFFF);
+            /* 设置背景为渐变蓝色 */
+            color: white;
+            /* 设置字体颜色为白色 */
         }
 
         h1 {
@@ -25,20 +27,26 @@
 
         input[type="text"] {
             width: 93%;
-            padding: 15px; /* 增大输入框的内边距 */
+            padding: 15px;
+            /* 增大输入框的内边距 */
             margin-top: 20px;
-            font-size: 16px; /* 增大字体 */
+            font-size: 16px;
+            /* 增大字体 */
             border: none;
             border-radius: 5px;
-            text-align: center; /* 输入框内容居中对齐 */
+            text-align: center;
+            /* 输入框内容居中对齐 */
         }
 
         button {
             width: 100%;
-            padding: 15px; /* 增大按钮的内边距 */
+            padding: 15px;
+            /* 增大按钮的内边距 */
             margin-top: 20px;
-            font-size: 16px; /* 增大字体 */
-            background-color: #0056b3; /* 设置按钮背景颜色 */
+            font-size: 16px;
+            /* 增大字体 */
+            background-color: #0056b3;
+            /* 设置按钮背景颜色 */
             color: white;
             border: none;
             border-radius: 5px;
@@ -46,7 +54,8 @@
         }
 
         button:hover {
-            background-color: #004494; /* 鼠标悬停时按钮颜色 */
+            background-color: #004494;
+            /* 鼠标悬停时按钮颜色 */
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- 引入 jQuery -->
@@ -54,7 +63,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </head>
 
-<body>
+<body onload>
     <div id="container">
         <h1>欢迎来到web聊天</h1>
         <input id="username" type="text" placeholder="请输入您的用户名">
@@ -63,6 +72,23 @@
     </div>
 
     <script>
+        // import OpenAI from "openai";
+
+        // const openai = new OpenAI({
+        //     baseURL: 'https://api.deepseek.com',
+        //     apiKey: '<DeepSeek API Key>'
+        // });
+
+        // async function main() {
+        //     const completion = await openai.chat.completions.create({
+        //         messages: [{ role: "system", content: "You are a helpful assistant." }],
+        //         model: "deepseek-chat",
+        //     });
+
+        //     console.log(completion.choices[0].message.content);
+        // }
+
+        
         function createChat() {
             const username = document.getElementById('username').value;
             if (!username) {
@@ -78,6 +104,17 @@
                 success: function (data) {
                     console.log('聊天创建成功:', data);
                     alert('创建聊天成功，密钥是：' + data.key);
+                    // 询问用户是否要复制密钥
+                    if (confirm('是否复制密钥到剪贴板？')) {
+                        // 创建一个临时文本区域
+                        const tempInput = document.createElement('input');
+                        tempInput.value = data.key;
+                        document.body.appendChild(tempInput);
+                        tempInput.select(); // 选中内容
+                        document.execCommand('copy'); // 复制内容
+                        document.body.removeChild(tempInput); // 移除临时文本区域
+                        alert('密钥已复制到剪贴板！');
+                    }
                     sessionStorage.setItem("chatKey", data.key); // 存储聊天密钥
                     window.location.href = "createChat.html?chatKey=" + encodeURIComponent(data.key) + "&username=" + encodeURIComponent(username);
                 },
@@ -89,11 +126,11 @@
         }
 
         function joinChat() {
-            const username = document.getElementById('username').value;
-            if (!username) {
+            if (!document.getElementById('username').value) {
                 alert('用户名不能为空！');
                 return;
             }
+            const username = document.getElementById('username').value;
             const key = prompt("输入密钥:");
             if (key) {
                 // 验证密钥是否有效

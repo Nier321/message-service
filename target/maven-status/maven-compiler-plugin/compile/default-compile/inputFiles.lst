@@ -1,11 +1,13 @@
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\config\RocketMQConfig.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\service\MessageService.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\MessageServiceApplication.java
+D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\request\MessageRequest.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\event\ChatEvent.java
+D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\request\DeleteRequest.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\service\ChatService.java
-D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\controller\MessageRequest.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\config\WebSocketConfig.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\constant\MQConstants.java
+D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\config\RedisConfig.java
 D:\Projects\jobconnect\message-service\src\main\java\com\util\KeyGeneratorExample.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\config\RocketMQConsumerConfig.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\listener\ChatEventListener.java
@@ -14,5 +16,6 @@ D:\Projects\jobconnect\message-service\src\main\java\com\util\JwtUtil.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\service\impl\MessageServiceImpl.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\dto\ChatDTO.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\service\impl\ChatServiceImpl.java
+D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\util\FileUtil.java
 D:\Projects\jobconnect\message-service\src\main\java\com\util\Jwt2Util.java
 D:\Projects\jobconnect\message-service\src\main\java\com\jobconnect\message\model\ChatMessage.java

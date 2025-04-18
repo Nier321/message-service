@@ -32,6 +32,7 @@ public class MessageServiceImpl implements MessageService {
         // 创建消息对象，携带事件数据
         Message<ChatEvent> message = MessageBuilder.withPayload(event).build();
         rocketMQTemplate.syncSend(destination, message);
+        //rocketMQTemplate.syncSendOrderly(destination, message, destination);
         log.info("{}聊天事件发生！: {}",tag, event);
         // 通过 RocketMQ 异步发送消息
        /*  rocketMQTemplate.asyncSend(destination, message, new SendCallback(){

@@ -5,77 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>聊天室</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(to right, #007BFF, #00BFFF); /* 温馨的渐变背景 */
-            color: white;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            justify-content: space-between;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        #chatContainer {
-            width: 95%;
-            margin: auto;
-            border: 1px solid #fff;
-            border-radius: 10px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #chatMessages {
-            max-height: 98%;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            padding: 15px;
-            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */ /* 移除阴影 */
-            border: none; /* 添加这一行以去掉边框 */
-            width: 100%; /* 确保宽度与 #chatContainer 一致 */
-        }
-
-        #Container {
-            display: flex;
-            margin-top: auto; /* 确保输入框和按钮在底部 */
-        }
-
-        input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            margin-right: 5%;
-            border-radius: 5px;
-            border: none;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
-
-        button {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #4CAF50; /* 修改按钮颜色 */
-            color: white;
-            cursor: pointer;
-            width: 20%;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
-
-        button:hover {
-            background-color: #3e8e41;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="css/comStyle.css"> <!-- 引入公共样式 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

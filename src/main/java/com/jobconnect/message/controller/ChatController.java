@@ -50,7 +50,7 @@ public class ChatController {
     @PostMapping("/joinChat")
     public ResponseEntity<Map<String, Object>> joinChat(@Valid @RequestParam String key,
             @Valid @RequestParam String userId) {
-        logger.info("joinChat request to validate key: {} ，user:{}", key, userId);
+        logger.info("Controller joinChat request to validate key: {} ，user:{}", key, userId);
         if (chatService.joinChat(key, userId)) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);

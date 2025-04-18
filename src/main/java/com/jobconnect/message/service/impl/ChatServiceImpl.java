@@ -1,5 +1,6 @@
 package com.jobconnect.message.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,8 @@ import com.jobconnect.message.dto.ChatDTO;
 import com.jobconnect.message.event.ChatEvent;
 import com.jobconnect.message.service.ChatService;
 import com.jobconnect.message.service.MessageService;
+import com.jobconnect.message.util.FileUtil;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -93,6 +96,7 @@ public class ChatServiceImpl implements ChatService {
                 .eventType("CREATE")
                 .build();
         // messageService.sendChatEvent(chatEvent, MQConstants.TAG_CHAT_NEW);
+        FileUtil.createFile(key);
         logger.debug("service聊天室已create");
         return chat;
         });
@@ -106,7 +110,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public Boolean joinChat(String chatKey, String username) {
-        logger.info("joinChat request to validate key: {} ，user:{}", chatKey, username);
+        logger.info("Service ：joinChat request to validate key: {} ，user:{}", chatKey, username);
         Future<Boolean> future = executorPool.submit(() -> {
         logger.debug("service join check 检查聊天室是否存在:{}", chatSessions.containsKey(chatKey));
         if (chatSessions.get(chatKey) != null) {
@@ -118,6 +122,7 @@ public class ChatServiceImpl implements ChatService {
                     .eventType("JOIN")
                     .build();
             // messageService.sendChatEvent(chatEvent, MQConstants.TAG_CHAT_JOIN);
+            FileUtil.writeToFile(chatKey, username+"：你好！我是" + username);
             logger.debug("service聊天室已join");
             return true;
         } else {
@@ -135,6 +140,12 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public void sendMessage(String chatKey, String sender, String message) {
         sendMessageToWebSocket(chatKey, sender, message);
+        try {
+            FileUtil.writeToFile(chatKey, sender + "："+ message);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
     }
 

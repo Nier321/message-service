@@ -1,0 +1,124 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(to right, #007BFF, #00BFFF); /* 温馨的渐变背景 */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+    justify-content: space-between;
+    overflow-y: hidden; /* 隐藏滚动条 */
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#chatContainer {
+    height: 95%;
+    width: 95%;
+    margin: auto;
+    border: 1px solid #fff;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#chatMessages {
+    max-height: 90%;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    padding: 15px;
+    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */ /* 移除阴影 */
+    border: none; /* 添加这一行以去掉边框 */
+    width: 100%; /* 确保宽度与 #chatContainer 一致 */
+}
+
+/* 滚动条样式 */
+#chatMessages::-webkit-scrollbar {
+    width: 8px; /* 滚动条的宽度 */
+}
+
+#chatMessages::-webkit-scrollbar-thumb {
+    background-color: #888; /* 滚动条的颜色 */
+    border-radius: 10px; /* 滚动条的圆角 */
+}
+
+#chatMessages::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1); /* 滚动条轨道的背景颜色 */
+}
+
+#chatMessages::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* 滚动条悬停时的颜色 */
+}
+
+
+#Container {
+    position: fixed; /* 固定定位 */
+    bottom: 20px; /* 距离底部20px */
+    left: 50%; /* 水平居中 */
+    transform: translateX(-50%); /* 使其真正居中 */
+    width: 92%; /* 确保宽度与聊天框一致 */
+    display: flex;
+    justify-content: space-between; /* 按钮和输入框之间的间距 */
+    align-items: center; /* 垂直居中对齐 */
+    /* background-color: rgba(0, 0, 0, 0.7); 可选：设置背景色 */
+    padding: 10px; /* 可选：添加内边距 */
+    border-radius: 5px; /* 可选：添加圆角 */
+    margin-top: auto; /* 确保输入框和按钮在底部 */
+}
+
+input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    margin-right: 5%;
+    border-radius: 5px;
+    border: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+button {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #4CAF50; /* 修改按钮颜色 */
+    color: white;
+    cursor: pointer;
+    width: 20%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+    background-color: #3e8e41;
+}
+
+/* 针对手机端的样式 */
+@media (max-width: 1000px) {
+    body {
+        font-size: 28px; /* 增大字体 */
+    }
+
+    #Container {
+        padding: 15px; /* 增加内边距 */
+    }
+
+    #messageInput {
+        font-size: 38px; /* 增大输入框字体 */
+        padding: 10px; /* 增加输入框内边距 */
+    }
+    p {
+        font-size: 42px; /* 增大消息字体 */
+        padding: 10px; /* 增加消息内边距 */
+    }
+    button {
+        font-size: 32px; /* 增大按钮字体 */
+        padding: 10px 20px; /* 增加按钮内边距 */
+    }
+}

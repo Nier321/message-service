@@ -5,9 +5,15 @@ spring:
   application:
     name: message-service
 
+ # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
+
     # rocketMQ 配置
 rocketmq:
-  name-server: 127.0.0.1:9876
+  name-server: 1kt0362to8824.vicp.fun:58004
   producer:
     group: GROUP_MESSAGE_PRODUCER
     send message timeout: 3000
