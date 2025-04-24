@@ -5,6 +5,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>聊天室</title>
     <link rel="stylesheet" type="text/css" href="css/comStyle.css"> <!-- 引入公共样式 -->
+    <!-- 2025-4江西 新增加密/解密依赖 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script> <!-- AES加密库 -->
+    <script src="aes-util.js"></script> <!-- 通用AES工具 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script>
@@ -21,19 +24,17 @@
             const socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
-                console.log('Connected: ' + frame);
                 stompClient.subscribe('/topic/messages/' + chatKey, function (message) {
                     console.log('Received message body: ', message.body); 
                     const chatMessage = JSON.parse(message.body);
-                    console.log('subscribed tochatMessage: ' + chatMessage.JSON);
                     displayMessage(chatMessage);
                 });
-            });
+               });
         }
 
         function displayMessage(chatMessage) {
             const messagesDiv = document.getElementById('chatMessages');
-            messagesDiv.innerHTML += '<p><strong>' + chatMessage.userId + ':</strong> ' + chatMessage.message + '</p>';
+            messagesDiv.innerHTML += '<p><strong>' + chatMessage.userId + ':</strong> ' + aesDecrypt(chatMessage.message) + '</p>'; // 2025-4江西 新增加密/解密代码
             messagesDiv.scrollTop = messagesDiv.scrollHeight; // 滚动到最新消息
         }
 
@@ -41,16 +42,32 @@
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value;
             if (message && stompClient) {
+                /* 2025-4江西 原始代码
                 stompClient.send('/app/sendMessage', {}, JSON.stringify({
                     chatkey: chatKey,
                     userId: username,
                     message: message
                 }));
+                */
+                // 2025-4江西 新增加密/解密代码
+                // 构造消息对象并加密
+                stompClient.send('/app/sendMessage', {}, JSON.stringify({
+                    chatkey: aesEncrypt(chatKey),
+                    userId: username,
+                    message: aesEncrypt(message)
+                }));
                 messageInput.value = '';
             }
         }
         
+        function confirmQuitChat() {
+            if (confirm("您确认退出聊天吗？")) {
+                quitChat();
+            }
+        }
+
         function quitChat() {
+   
             stompClient.unsubscribe('/topic/messages/' + chatKey);
             stompClient.disconnect();
             sessionStorage.removeItem('chatKey');
@@ -69,8 +86,8 @@
             <input id="messageInput" type="text" placeholder="输入您的消息...">
             <button onclick="sendMessage()">发送消息</button>
         </div>
-        
     </div>
+    <button id="quitButton" style="position: absolute; top: 10px; right: 10px;" onclick="confirmQuitChat()">退出聊天</button>
     
 </body>
 </html>

@@ -61,6 +61,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- 引入 jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <!-- 2025-4江西 新增加密/解密依赖 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script> <!-- AES加密库 -->
+    <script src="aes-util.js"></script> <!-- 通用AES工具 -->
 </head>
 
 <body onload>
@@ -72,23 +75,6 @@
     </div>
 
     <script>
-        // import OpenAI from "openai";
-
-        // const openai = new OpenAI({
-        //     baseURL: 'https://api.deepseek.com',
-        //     apiKey: '<DeepSeek API Key>'
-        // });
-
-        // async function main() {
-        //     const completion = await openai.chat.completions.create({
-        //         messages: [{ role: "system", content: "You are a helpful assistant." }],
-        //         model: "deepseek-chat",
-        //     });
-
-        //     console.log(completion.choices[0].message.content);
-        // }
-
-        
         function createChat() {
             const username = document.getElementById('username').value;
             if (!username) {
@@ -102,6 +88,7 @@
                 contentType: 'application/json',
                 data: JSON.stringify({ userId: username }),
                 success: function (data) {
+                    /* 2025-4江西 原始代码
                     console.log('聊天创建成功:', data);
                     alert('创建聊天成功，密钥是：' + data.key);
                     // 询问用户是否要复制密钥
@@ -117,7 +104,26 @@
                     }
                     sessionStorage.setItem("chatKey", data.key); // 存储聊天密钥
                     window.location.href = "createChat.html?chatKey=" + encodeURIComponent(data.key) + "&username=" + encodeURIComponent(username);
-                },
+                    */
+                    // 2025-4江西 新增加密/解密代码
+                    // 对密钥进行解密展示
+                    console.log('聊天创建成功:', data);
+                    const decryptedKey = aesDecrypt(data.key); 
+                    alert('创建聊天成功，密钥是：' + decryptedKey);
+                    // 询问用户是否要复制密钥
+                    if (confirm('是否复制密钥到剪贴板？')) {
+                        // 创建一个临时文本区域
+                        const tempInput = document.createElement('input');
+                        tempInput.value = decryptedKey;
+                        document.body.appendChild(tempInput);
+                        tempInput.select(); // 选中内容
+                        document.execCommand('copy'); // 复制内容
+                        document.body.removeChild(tempInput); // 移除临时文本区域
+                        alert('加密密钥已复制到剪贴板！');
+                    }
+                    // 存储加密密钥到session
+                    sessionStorage.setItem("chatKey", decryptedKey);
+                    window.location.href = "createChat.html?chatKey=" + encodeURIComponent(decryptedKey) + "&username=" + encodeURIComponent(username);                },
                 error: function (xhr, status, error) {
                     alert('创建聊天失败，请重试。');
                     console.error('错误:', error);
@@ -131,19 +137,23 @@
                 return;
             }
             const username = document.getElementById('username').value;
-            const key = prompt("输入密钥:");
+            // 2025-4江西 新增加密
+            const Okey = prompt("输入密钥:");
+            const key = aesEncrypt(Okey);
+            console.log(key);
             if (key) {
                 // 验证密钥是否有效
                 $.ajax({
-                    url: '/api/joinChat?key=' + key + '&userId=' + encodeURIComponent(sessionStorage.getItem('username')),
+                    url: '/api/joinChat',
                     type: 'POST',
+                    contentType: 'application/json',
                     data: JSON.stringify({
                         key: key,
                         userId: username
                     }),
                     success: function (response) {
                         if (response.success) {
-                            sessionStorage.setItem("chatKey", key);
+                            sessionStorage.setItem("chatKey", Okey);// 2025-4江西 新增解密
                             sessionStorage.setItem("username", username);
                             // 跳转到加入聊天页面
                             alert('密钥正确！');

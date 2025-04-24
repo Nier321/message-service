@@ -22,6 +22,7 @@ import com.jobconnect.message.dto.ChatDTO;
 import com.jobconnect.message.event.ChatEvent;
 import com.jobconnect.message.service.ChatService;
 import com.jobconnect.message.service.MessageService;
+import com.jobconnect.message.util.AESUtil;
 import com.jobconnect.message.util.FileUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -115,7 +116,7 @@ public class ChatServiceImpl implements ChatService {
         logger.debug("service join check 检查聊天室是否存在:{}", chatSessions.containsKey(chatKey));
         if (chatSessions.get(chatKey) != null) {
             chatSessions.get(chatKey).add(username); // 将用户加入聊天室
-            sendMessageToWebSocket(chatKey, username, "你好！我是" + username);// 发送加入消息
+            sendMessageToWebSocket(chatKey, username, AESUtil.encrypt(new String("加入聊天" )));// 发送加入消息
             ChatEvent chatEvent = ChatEvent.builder()
                     .chatKey(chatKey)
                     .joiner(username)
@@ -153,6 +154,7 @@ public class ChatServiceImpl implements ChatService {
     public void deleteChat(String chatKey) {
         synchronized (chatSessions) {
             logger.debug("before{} chatkey:{}", chatSessions.size(), chatKey.trim());
+            sendMessageToWebSocket(chatKey, chatKey, chatKey);
                 chatSessions.remove(chatKey);
             chatSessions.forEach((k, v) -> logger.debug("service chatkey1:{} 聊天室已删除 检查:{}", k, v));
         }

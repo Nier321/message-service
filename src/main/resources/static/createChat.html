@@ -9,6 +9,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 2025-4江西 新增加密/解密依赖 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script> <!-- AES加密库 -->
+    <script src="aes-util.js"></script> <!-- 通用AES工具 -->
 </head>
 
 <body onload="connect()">
@@ -49,7 +52,7 @@
 
         function displayMessage(chatMessage) {
             const messagesDiv = document.getElementById('chatMessages');
-            messagesDiv.innerHTML += '<p><strong>' + chatMessage.userId + ':</strong> ' + chatMessage.message + '</p>';
+            messagesDiv.innerHTML += '<p><strong>' + chatMessage.userId + ':</strong> ' + aesDecrypt(chatMessage.message) + '</p>';
             messagesDiv.scrollTop = messagesDiv.scrollHeight; // 滚动到最新消息
         }
 
@@ -57,10 +60,19 @@
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value;
             if (message && stompClient) {
+                /* 2025-4江西 原始代码
                 stompClient.send('/app/sendMessage', {}, JSON.stringify({
                     chatkey: chatKey,
                     userId: username,
                     message: message,
+                }));
+                */
+                // 2025-4江西 新增加密/解密代码
+                // 构造消息对象并加密
+                stompClient.send('/app/sendMessage', {}, JSON.stringify({
+                    chatkey: aesEncrypt(chatKey),
+                    userId: username,
+                    message: aesEncrypt(message),
                 }));
                 messageInput.value = '';
             }
@@ -68,14 +80,14 @@
 
 
         function confirmQuitChat() {
-            if (confirm("您确认退出聊天吗？")) {
+            if (confirm("您确认结束聊天吗？")) {
                 quitChat();
             }
         }
 
         function quitChat() {
             stompClient.send('/app/quitChat', {}, JSON.stringify({
-                chatKey: chatKey,
+                chatKey: aesEncrypt(chatKey),// 2025-4江西 新增加密
             })
             )
             stompClient.unsubscribe('/topic/messages/' + chatKey);
