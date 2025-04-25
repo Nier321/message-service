@@ -1,32 +1,53 @@
-message-service/
-├── src/
-│   └── main/
-│       └── java/
-│           └── com/
-│               └── jobconnect/
-│                   └── message/
-│                       ├── MessageServiceApplication.java
-│                       ├── config/
-│                       │   ├── RocketMQConfig.java：配置 RocketMQ 消息队列。
-│                       │   ├── RocketMQConsumerConfig.java ：配置 RocketMQ 消费者。
-│                       │   └── WebSocketConfig.java ：配置 WebSocket 连接。
-│                       ├── constant/
-│                       │   └── MQConstants.java ：定义与消息队列相关的常量。
-│                       ├── controller/
-│                       │   ├── ChatController.java ：处理与聊天相关的 HTTP 请求。
-│                       ├── dto/
-│                       │   └── ChatDTO.java 定义聊天数据传输对象。
-│                       ├── event/
-│                       │   └── ChatEvent.java 定义聊天事件，用于在系统中传递聊天相关的事件信息。
-│                       ├── listener/
-│                       │   └── ChatEventListener.java ：监听聊天事件并处理相应的逻辑。
-│                       ├── model/
-│                       │   └── ChatMessage.java ：定义聊天消息的模型类，表示消息的结构。
-│                       │   └── MessageRequest.java ：定义消息请求类（数据传输对象）。
-│                       └── service/
-│                           ├── ChatService.java ：定义聊天服务的接口。
-│                           ├── MessageService.java
-│                           └── impl/
-│                               ├── ChatServiceImpl.java ：实现聊天服务的逻辑。
-│                               └── MessageServiceImpl.java
-项目是一个实现实时聊天功能的服务，使用 Spring Boot 框架构建。其结构清晰，分为配置、控制器、数据传输对象、事件、监听器、模型和服务等模块，便于维护和扩展。项目通过 WebSocket 和消息队列（如 RocketMQ）实现实时通信，确保用户之间的消息能够迅速传递。
+message-service
+
+即时消息子系统，基于 Spring Boot，支持多用户聊天室、消息加密传输、WebSocket 实时通信、(RocketMQ 消息队列)。适合招聘、社交等需要高效消息交互的场景。
+
+项目亮点
+
+支持聊天室创建、加入、消息收发、在线人数等功能
+
+RESTful API + WebSocket 实时推送
+
+支持多用户并发、线程安全
+
+// RocketMQ 实现异步消息分发
+
+自定义注解 + AOP 实现消息加解密，提升安全性
+
+完善的日志与配置管理
+
+技术栈
+
+Java 18
+Spring Boot 2.5.x
+Spring Web、WebSocket
+// RocketMQ
+Redis（开发中）
+Lombok、Jackson
+前端：HTML/CSS/JavaScript
+
+核心功能展示
+
+![image](https://github.com/user-attachments/assets/cb69e9a8-8f10-4e38-bb9f-1e1b3775ec62)
+
+![image](https://github.com/user-attachments/assets/640c5e7b-2b5c-4492-b2ee-a203f483f970)
+
+![image](https://github.com/user-attachments/assets/ed409607-b374-45ad-8c74-647de8f9cd2f)
+
+
+本地部署
+
+1.克隆仓库
+
+			git clone https://github.com/Nier321/message-service.git
+			cd **/message-service
+2.配置 Redis、RocketMQ 服务（如果需要的话），并修改 application.yml
+
+3.构建并启动
+
+			mvn clean install
+			mvn spring-boot:run
+4.访问
+
+页面: http://localhost:8080/index.html
+																																																				
