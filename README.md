@@ -35,19 +35,4 @@ Lombok、Jackson
 ![image](https://github.com/user-attachments/assets/ed409607-b374-45ad-8c74-647de8f9cd2f)
 
 
-本地部署
-
-1.克隆仓库
-
-			git clone https://github.com/Nier321/message-service.git
-			cd **/message-service
-2.配置 Redis、RocketMQ 服务（如果需要的话），并修改 application.yml
-
-3.构建并启动
-
-			mvn clean install
-			mvn spring-boot:run
-4.访问
-
-页面: http://localhost:8080/index.html
 																																																				
